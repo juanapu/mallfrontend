@@ -82,6 +82,7 @@
         <div class="page-title-normal">
           <h2 class="page-title-h2"><span>My Cart</span></h2>
         </div>
+
         <div class="item-list-wrap">
           <div class="cart-item">
             <div class="cart-item-head">
@@ -93,11 +94,11 @@
                 <li>Edit</li>
               </ul>
             </div>
-            <ul class="cart-item-list">
+            <ul class="cart-item-list" v-for="(item,index) in resData">
               <li>
                 <div class="cart-tab-1">
                   <div class="cart-item-check">
-                    <a href="javascipt:;" class="checkbox-btn item-check-btn">
+                    <a href="javascipt:;" class="checkbox-btn item-check-btn" v-bind:class="{'check':item.cartChecked}" @click="changeCheck(item.cartChecked,item.productId,index)">
                       <svg class="icon icon-ok">
                         <use xlink:href="#icon-ok"></use>
                       </svg>
@@ -107,18 +108,18 @@
                     <img src="/static/1.jpg">
                   </div>
                   <div class="cart-item-title">
-                    <div class="item-name">XX</div>
+                    <div class="item-name">{{item.productName}}</div>
                   </div>
                 </div>
                 <div class="cart-tab-2">
-                  <div class="item-price">1000</div>
+                  <div class="item-price">{{item.productPrice}}</div>
                 </div>
                 <div class="cart-tab-3">
                   <div class="item-quantity">
                     <div class="select-self select-self-open">
                       <div class="select-self-area">
                         <a class="input-sub">-</a>
-                        <span class="select-ipt">10</span>
+                        <span class="select-ipt">{{item.productNum}}</span>
                         <a class="input-add">+</a>
                       </div>
                     </div>
@@ -138,8 +139,10 @@
                 </div>
               </li>
             </ul>
+
           </div>
         </div>
+
         <div class="cart-foot-wrap">
           <div class="cart-foot-inner">
             <div class="cart-foot-l">
@@ -219,11 +222,37 @@
   }
 </style>
 <script>
+   import axios from 'axios';
+
     export default{
         data(){
             return{
-
+                resData: []
+            }
+        },
+        mounted(){
+          axios.post('/goods/cartList')
+            .then(res=>{
+              this.resData = res?(res.data?(res.data.result?res.data.result.data:[]):[]):[];
+              console.log(this.resData);
+            })
+        },
+        methods: {
+            changeCheck(check,productid,index){
+               axios.post('/goods/cartChecked',{
+                productid: productid
+               })
+                .then(res=>{
+                  console.log(res);
+                  if(res.data.status==="0"){
+                    // window.location.reload();
+                    this.resData[index].cartChecked = !this.resData[index].cartChecked; 
+                  }else{
+                    alert(" something went wrong");
+                  }
+                }) 
             }
         }
+
     }
 </script>
